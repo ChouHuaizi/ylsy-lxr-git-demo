@@ -1,0 +1,282 @@
+C51 COMPILER V9.01   LCD1602_IIC_                                                          12/01/2021 23:08:10 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE LCD1602_IIC_
+OBJECT MODULE PLACED IN LCD1602(IIC).obj
+COMPILER INVOKED BY: E:\ruanjian\keil\C51\BIN\C51.EXE HARDWARE\1602\LCD1602(IIC).c BROWSE INCDIR(.\HARDWARE\1602;.\HARDW
+                    -ARE\OLED) DEBUG OBJECTEXTEND PRINT(.\LCD1602(IIC).lst) OBJECT(LCD1602(IIC).obj)
+
+line level    source
+
+   1          #include "IIC.h"
+   2          
+   3          #define adress_1602 0x4e  
+   4          
+   5          
+   6          unsigned char LCD_data=0x08;
+   7          
+   8          
+   9          //bit ack;
+  10                                   
+  11          sbit SCL = P0^0;//定义两个数据端口
+  12          sbit SDA = P0^1;
+  13          
+  14          /**************************************
+  15          发送IIC总线起始信号
+  16          **************************************/
+  17          void IIC_Start()
+  18          {
+  19   1              SDA=1;
+  20   1              Delay1us(4);
+*** WARNING C206 IN LINE 20 OF HARDWARE\1602\LCD1602(IIC).C: 'Delay1us': missing function-prototype
+*** ERROR C267 IN LINE 20 OF HARDWARE\1602\LCD1602(IIC).C: 'Delay1us': requires ANSI-style prototype
+  21   1              SCL=1;
+  22   1              Delay1us(4);
+  23   1              SDA=0;
+  24   1              Delay1us(4);
+  25   1              SCL=0;
+  26   1              Delay1us(4);
+  27   1      }
+  28          /**************************************
+  29          发送IIC总线结束信号
+  30          **************************************/
+  31          void IIC_Stop()
+  32          {
+  33   1              SCL=0;
+  34   1              Delay1us(4);
+  35   1              SDA=0;
+  36   1              Delay1us(4);
+  37   1              SCL=1;
+  38   1              Delay1us(4);
+  39   1              SDA=1;
+  40   1              Delay1us(4);
+  41   1      }
+  42          /**************************************
+  43          发送应答信号
+  44          入口参数:ack (0:ACK 1:NAK)
+  45          **************************************/
+  46          void IIC_SendACK(bit ack)
+  47          {
+  48   1          SDA = ack;                  //写应答信号
+  49   1          SCL = 1;                    //拉高时钟线
+  50   1          Delay1us(5);                 //延时
+  51   1          SCL = 0;                    //拉低时钟线
+  52   1          Delay1us(5);                  //延时
+C51 COMPILER V9.01   LCD1602_IIC_                                                          12/01/2021 23:08:10 PAGE 2   
+
+  53   1      }
+  54          /**************************************
+  55          从IIC总线发送一个字节数据
+  56          **************************************/
+  57          void IIC_SendByte(unsigned char c)
+  58          {
+  59   1              unsigned char BitCnt;
+  60   1              for(BitCnt=0;BitCnt<8;BitCnt++)  //要传送的数据长度为8位
+  61   1              {
+  62   2                      if((c<<BitCnt)&0x80)  SDA=1;   //判断发送位
+  63   2                      else  SDA=0;                
+  64   2                      _nop_();
+  65   2                      SCL=1;               //置时钟线为高，通知被控器开始接收数据位
+  66   2                      Delay1us(4);; 
+  67   2                      _nop_();       
+  68   2                      SCL=0; 
+  69   2              }  
+  70   1              _nop_();
+  71   1              _nop_();
+  72   1              SDA=1;               //8位发送完后释放数据线，准备接收应答位
+  73   1              _nop_();
+  74   1              _nop_();  
+  75   1              SCL=1;
+  76   1              _nop_();
+  77   1              _nop_();
+  78   1              _nop_();
+  79   1              if(SDA==1)ack=0;     
+*** ERROR C202 IN LINE 79 OF HARDWARE\1602\LCD1602(IIC).C: 'ack': undefined identifier
+  80   1              else ack=1;        //判断是否接收到应答信号                    
+*** ERROR C202 IN LINE 80 OF HARDWARE\1602\LCD1602(IIC).C: 'ack': undefined identifier
+  81   1              SCL=0;
+  82   1              _nop_();
+  83   1              _nop_();
+  84   1      }
+  85          /**************************************
+  86          从IIC总线发送一个随机地址数据
+  87          **************************************/
+  88          int Write_Random_Address_Byte(unsigned char add,unsigned char dat)
+  89          {
+  90   1              IIC_Start();    //启动总线
+  91   1              IIC_SendByte(add); //发送器件地址
+  92   1              if(ack==0)return(0);
+*** ERROR C202 IN LINE 92 OF HARDWARE\1602\LCD1602(IIC).C: 'ack': undefined identifier
+  93   1              IIC_SendByte(dat);   //发送数据
+  94   1              if(ack==0)return(0);
+*** ERROR C202 IN LINE 94 OF HARDWARE\1602\LCD1602(IIC).C: 'ack': undefined identifier
+  95   1              IIC_Stop(); //结束总线
+  96   1              return(1);
+  97   1      }
+  98          
+  99          /**************************************
+ 100          从IIC总线接收一个字节数据
+ 101          **************************************/
+ 102          int  IIC_RecvByte()
+ 103          {
+ 104   1          BYTE i;
+*** ERROR C202 IN LINE 104 OF HARDWARE\1602\LCD1602(IIC).C: 'BYTE': undefined identifier
+*** ERROR C141 IN LINE 104 OF HARDWARE\1602\LCD1602(IIC).C: syntax error near 'i'
+ 105   1          BYTE dat = 0;
+*** ERROR C202 IN LINE 105 OF HARDWARE\1602\LCD1602(IIC).C: 'BYTE': undefined identifier
+*** ERROR C141 IN LINE 105 OF HARDWARE\1602\LCD1602(IIC).C: syntax error near 'dat'
+ 106   1      
+C51 COMPILER V9.01   LCD1602_IIC_                                                          12/01/2021 23:08:10 PAGE 3   
+
+ 107   1          SDA = 1;                    //使能内部上拉,准备读取数据,
+ 108   1          for (i=0; i<8; i++)         //8位计数器
+*** ERROR C202 IN LINE 108 OF HARDWARE\1602\LCD1602(IIC).C: 'i': undefined identifier
+ 109   1          {
+ 110   2              dat <<= 1;
+*** ERROR C202 IN LINE 110 OF HARDWARE\1602\LCD1602(IIC).C: 'dat': undefined identifier
+ 111   2              SCL = 1;                //拉高时钟线
+ 112   2              Delay1us(5);             //延时
+ 113   2              dat |= SDA;             //读数据               
+*** ERROR C202 IN LINE 113 OF HARDWARE\1602\LCD1602(IIC).C: 'dat': undefined identifier
+ 114   2              SCL = 0;                //拉低时钟线
+ 115   2              Delay1us(5);             //延时
+ 116   2          }
+ 117   1          return dat;
+*** ERROR C202 IN LINE 117 OF HARDWARE\1602\LCD1602(IIC).C: 'dat': undefined identifier
+ 118   1      }
+ 119          //********************液晶屏使能*********************
+ 120          void Enable_LCD_write()
+ 121          {
+ 122   1              LCD_data|=(1<<(3-1));//E=1;
+ 123   1              Write_Random_Address_Byte(adress_1602,LCD_data);  //
+ 124   1              Delay1us(2);
+ 125   1              LCD_data&=~(1<<(3-1));//E=0;
+ 126   1              Write_Random_Address_Byte(adress_1602,LCD_data);
+ 127   1      }
+ 128          /*------------------------------------------------
+ 129                        写入命令函数
+ 130          ------------------------------------------------*/
+ 131          void LCD_write_command(unsigned char command) 
+ 132          { 
+ 133   1              Delay1us(16);
+ 134   1              LCD_data&=~(1<<(1-1));//RS=0;
+ 135   1              LCD_data&=~(1<<(2-1));//RW=0;
+ 136   1              //LCD_data&=~(1<<(4-1));
+ 137   1              Write_Random_Address_Byte(adress_1602,LCD_data);
+ 138   1              
+ 139   1              LCD_data&=0X0f; //清高四位
+ 140   1              LCD_data|=command & 0xf0; //写高四位
+ 141   1              Write_Random_Address_Byte(adress_1602,LCD_data);
+ 142   1              Enable_LCD_write();
+ 143   1              
+ 144   1              command=command<<4; //低四位移到高四位
+ 145   1              LCD_data&=0x0f; //清高四位
+ 146   1              LCD_data|=command&0xf0; //写低四位
+ 147   1              Write_Random_Address_Byte(adress_1602,LCD_data);
+ 148   1              Enable_LCD_write();
+ 149   1      }
+ 150          /*------------------------------------------------
+ 151                        写入数据函数
+ 152          ------------------------------------------------*/
+ 153          void LCD_write_dat(unsigned char value) 
+ 154          { 
+ 155   1              Delay1us(16);
+ 156   1              LCD_data|=(1<<(1-1));//RS=1;
+ 157   1              LCD_data&=~(1<<(2-1));//RW=0;
+ 158   1              Write_Random_Address_Byte(adress_1602,LCD_data);
+ 159   1              
+ 160   1              LCD_data&=0X0f; //清高四位
+ 161   1              LCD_data|=value&0xf0; //写高四位
+ 162   1              Write_Random_Address_Byte(adress_1602,LCD_data);
+ 163   1              Enable_LCD_write();         
+ 164   1              
+C51 COMPILER V9.01   LCD1602_IIC_                                                          12/01/2021 23:08:10 PAGE 4   
+
+ 165   1              value=value<<4; //低四位移到高四位
+ 166   1              LCD_data&=0x0f; //清高四位
+ 167   1              LCD_data|=value&0xf0; //写低四位
+ 168   1              Write_Random_Address_Byte(adress_1602,LCD_data);
+ 169   1              Enable_LCD_write();
+ 170   1      }
+ 171          
+ 172          /*------------------------------------------------
+ 173                          清屏函数
+ 174          ------------------------------------------------*/
+ 175          void LCD_Clear(void) 
+ 176          { 
+ 177   1              LCD_write_command(0x01); 
+ 178   1              Delay1ms(2);
+ 179   1      }
+ 180          
+ 181          /*------------------------------------------------
+ 182                          设置显示位置
+ 183          ------------------------------------------------*/
+ 184          void LCD_set_xy( unsigned char x, unsigned char y )
+ 185          {
+ 186   1              unsigned char address;
+ 187   1              if (y == 1) 
+ 188   1              address = 0x80 + x;
+ 189   1              else 
+ 190   1              address =0xc0+ x;
+ 191   1              LCD_write_command(address); 
+ 192   1      }
+ 193          
+ 194          /*------------------------------------------------
+ 195                          显示一个字符
+ 196          ------------------------------------------------*/
+ 197          void LCD_dsp_char( unsigned x,unsigned char y,unsigned char dat)
+ 198          {
+ 199   1              LCD_set_xy( x, y ); 
+ 200   1              LCD_write_dat(dat);
+ 201   1      }
+ 202          
+ 203          /*------------------------------------------------
+ 204                          显示字符串函数
+ 205          ------------------------------------------------*/
+ 206          void LCD_dsp_string(unsigned char X,unsigned char Y,unsigned char *s)
+ 207          {
+ 208   1              LCD_set_xy( X, Y ); 
+ 209   1              while (*s) 
+ 210   1              {
+ 211   2                      LCD_write_dat(*s);   
+ 212   2                      s ++;
+ 213   2              }
+ 214   1      }
+ 215          /*------------------------------------------------
+ 216                        把特殊字符数据写入显存
+ 217          ------------------------------------------------*/
+ 218          //void WriteCGRAM()
+ 219          //{
+ 220          //      unsigned char i,j,k,tmp;
+ 221          //      tmp=0x40;//设置CGRAM地址的格式字
+ 222          //      k=0;
+ 223          //      
+ 224          //      for(j=0;j<8;j++)
+ 225          //      {
+ 226          //              for(i=0;i<8;i++)
+C51 COMPILER V9.01   LCD1602_IIC_                                                          12/01/2021 23:08:10 PAGE 5   
+
+ 227          //              {
+ 228          //                      LCD_write_command(tmp+i); // 设置自定义字符的 CGRAM 地址 
+ 229          //                      Delay1us(50);
+ 230          //                      LCD_write_dat(table0[k]); // 向CGRAM写入自定义字符表的数据
+ 231          //                      k++;
+ 232          //                      Delay1us(50);
+ 233          //              }
+ 234          //              tmp=tmp+8;
+ 235          //      }
+ 236          //}
+ 237          /*------------------------------------------------
+ 238                        初始化函数
+ 239          ------------------------------------------------*/
+ 240          void LCD_Init(void) 
+ 241          {
+ 242   1              LCD_write_command(0x02);
+ 243   1              Delay1us(40);
+ 244   1              LCD_write_command(0x28); //4位显示！！！！！！！！！！！！！！！！！！
+ 245   1              LCD_write_command(0x0c); //显示开
+ 246   1              LCD_write_command(0x01); //清屏
+ 247   1              Delay1ms(10);
+ 248   1      }
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  13 ERROR(S)
