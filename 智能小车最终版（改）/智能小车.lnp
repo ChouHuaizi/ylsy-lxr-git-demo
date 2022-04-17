@@ -1,0 +1,9 @@
+"main.obj",
+"1602_LCD.obj",
+"Bluetooth.obj",
+"motor.obj",
+"Timer.obj",
+"RGB.obj",
+"delay.obj" 
+TO "ÖÇÄÜÐ¡³µ" 
+RAMSIZE(256) 
